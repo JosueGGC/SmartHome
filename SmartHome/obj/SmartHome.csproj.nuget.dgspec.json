@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\josue\\OneDrive\\Documentos\\OctavoSemestre\\SmartHome\\SmartHome\\SmartHome.csproj": {}
+    "C:\\Users\\josue\\source\\repos\\SmartHome\\SmartHome\\SmartHome.csproj": {}
   },
   "projects": {
-    "C:\\Users\\josue\\OneDrive\\Documentos\\OctavoSemestre\\SmartHome\\SmartHome\\SmartHome.csproj": {
+    "C:\\Users\\josue\\source\\repos\\SmartHome\\SmartHome\\SmartHome.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\josue\\OneDrive\\Documentos\\OctavoSemestre\\SmartHome\\SmartHome\\SmartHome.csproj",
+        "projectUniqueName": "C:\\Users\\josue\\source\\repos\\SmartHome\\SmartHome\\SmartHome.csproj",
         "projectName": "SmartHome",
-        "projectPath": "C:\\Users\\josue\\OneDrive\\Documentos\\OctavoSemestre\\SmartHome\\SmartHome\\SmartHome.csproj",
+        "projectPath": "C:\\Users\\josue\\source\\repos\\SmartHome\\SmartHome\\SmartHome.csproj",
         "packagesPath": "C:\\Users\\josue\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\josue\\OneDrive\\Documentos\\OctavoSemestre\\SmartHome\\SmartHome\\obj\\",
+        "outputPath": "C:\\Users\\josue\\source\\repos\\SmartHome\\SmartHome\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\josue\\AppData\\Roaming\\NuGet\\NuGet.Config",

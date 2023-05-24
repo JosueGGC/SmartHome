@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Win32;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
+using System.Numerics;
 using System.Text;
 
 /******************* Builder *************************************************************/
@@ -78,11 +80,11 @@ app.UseAuthorization();
 /***************************************************************************************/
 app.MapGet("/", [AllowAnonymous] () => "Mi SmartHome API");
 
-app.MapPost("/login", [AllowAnonymous] async (User user, SmarthomeContext db) =>
+app.MapPost("/login", [AllowAnonymous] async (Usuario user, SmarthomeContext db) =>
 {
-    var userdb = await db.Users.FindAsync(user.Username);
-    if (userdb is null) return Results.NotFound(user.Username);
-    if (userdb.Password != user.Password) return Results.Unauthorized();
+    var userdb = await db.Usuarios.FindAsync(user.nombre);
+    if (userdb is null) return Results.NotFound(user.nombre);
+    if (userdb.contra != user.contra) return Results.Unauthorized();
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]));
     var jwtTokenHandler = new JwtSecurityTokenHandler();
     var descriptor = new SecurityTokenDescriptor()
@@ -92,18 +94,21 @@ app.MapPost("/login", [AllowAnonymous] async (User user, SmarthomeContext db) =>
     };
     var token = jwtTokenHandler.CreateToken(descriptor);
     var jwtToken = jwtTokenHandler.WriteToken(token);
-    return Results.Ok(jwtToken);
+    //return Results.Ok(jwtToken);
+
+    var jwt = "{ \"jwt\": \"" + jwtToken + "\" }";
+    return Results.Text(jwt);
 });
 
-/************************* CRUD *****************************************************/
-app.MapGet("/sensores", [Authorize] async (SmarthomeContext db) =>
+/************************* CRUD CONTROL *****************************************************/
+app.MapGet("/control", [Authorize] async (SmarthomeContext db) =>
 {
-    return await db.Sensors.ToListAsync();
+    return await db.Registro.ToListAsync();
 });
 
-app.MapGet("/sensores/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+app.MapGet("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
 {
-    var sensor = await db.Sensors.FindAsync(id);
+    var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
     {
         return Results.NotFound();
@@ -111,61 +116,68 @@ app.MapGet("/sensores/{id}", [Authorize] async (int id, SmarthomeContext db) =>
     return Results.Ok(sensor);
 });
 
-app.MapPost("/sensores", [Authorize] async (Sensor s, SmarthomeContext db) =>
+app.MapPost("/control", [Authorize] async (Registros s, SmarthomeContext db) =>
 {
-    s.Date = DateTime.Now;
-    db.Sensors.Add(s);
+    s.fec_hora = DateTime.Now;
+    db.Registro.Add(s);
     await db.SaveChangesAsync();
-    return Results.Created($"/sensores/{s.Id}", s);
+    return Results.Created($"/control/{s.id_Registro}", s);
 });
 
-app.MapPut("/sensores/{id}", [Authorize] async (int id, Sensor s, SmarthomeContext db) =>
+app.MapPut("/control/{id}", [Authorize] async (int id, Registros s, SmarthomeContext db) =>
 {
-    var sensor = await db.Sensors.FindAsync(id);
+    var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
     {
         return Results.NotFound();
     }
-    sensor.Name = s.Name;
-    sensor.Value = s.Value;
+    sensor.op_Uno = s.op_Uno;
+    sensor.op_Dos = s.op_Dos;
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
 
-app.MapDelete("/sensores/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+app.MapDelete("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
 {
-    var sensor = await db.Sensors.FindAsync(id);
+    var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
     {
         return Results.NotFound();
     }
-    db.Sensors.Remove(sensor);
+    db.Registro.Remove(sensor);
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
 /*****************************************************************************************/
 
+
 app.Run();
 
-class User
+class Usuario
 {
     [Key]
-    public string? Username { get; set; }
-    public string? Password { get; set; }
+    public string? nombre { get; set; }
+    public string? contra { get; set; }
 }
-class Sensor
+
+class Registros
 {
     [Key]
-    public int Id { get; set; }
-    public string? Name { get; set; }
-    public double Value { get; set; }
-    public DateTime Date { get; set; }
+    public int id_Registro { get; set; }
+    public int id_Usuario { get; set; }
+    public string? sensor_Uno { get; set; }
+    public string? valor_Uno { get; set; }
+    public string? op_Uno { get; set; }
+    public string? sensor_Dos { get; set; }
+    public string? valor_Dos { get; set; }
+    public string? op_Dos { get; set; }
+    public DateTime fec_hora { get; set; }
 }
 
 class SmarthomeContext : DbContext
 {
-    public DbSet<Sensor> Sensors => Set<Sensor>();
-    public DbSet<User> Users => Set<User>();
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<Registros> Registro => Set<Registros>();
     public SmarthomeContext(DbContextOptions<SmarthomeContext> options) : base(options)
     {
     }
