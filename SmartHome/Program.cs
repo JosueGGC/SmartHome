@@ -100,13 +100,13 @@ app.MapPost("/login", [AllowAnonymous] async (Usuario user, SmarthomeContext db)
     return Results.Text(jwt);
 });
 
-/************************* CRUD CONTROL *****************************************************/
-app.MapGet("/control", [Authorize] async (SmarthomeContext db) =>
+/************************* CRUD REGISTRO *****************************************************/
+app.MapGet("/registro", [Authorize] async (SmarthomeContext db) =>
 {
     return await db.Registro.ToListAsync();
 });
 
-app.MapGet("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+app.MapGet("/registro/{id}", [Authorize] async (int id, SmarthomeContext db) =>
 {
     var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
@@ -116,7 +116,7 @@ app.MapGet("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
     return Results.Ok(sensor);
 });
 
-app.MapPost("/control", [Authorize] async (Registros s, SmarthomeContext db) =>
+app.MapPost("/registro", [Authorize] async (Registros s, SmarthomeContext db) =>
 {
     s.fec_hora = DateTime.Now;
     db.Registro.Add(s);
@@ -124,7 +124,7 @@ app.MapPost("/control", [Authorize] async (Registros s, SmarthomeContext db) =>
     return Results.Created($"/control/{s.id_Registro}", s);
 });
 
-app.MapPut("/control/{id}", [Authorize] async (int id, Registros s, SmarthomeContext db) =>
+app.MapPut("/registro/{id}", [Authorize] async (int id, Registros s, SmarthomeContext db) =>
 {
     var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
@@ -137,7 +137,7 @@ app.MapPut("/control/{id}", [Authorize] async (int id, Registros s, SmarthomeCon
     return Results.NoContent();
 });
 
-app.MapDelete("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+app.MapDelete("/registro/{id}", [Authorize] async (int id, SmarthomeContext db) =>
 {
     var sensor = await db.Registro.FindAsync(id);
     if (sensor is null)
@@ -145,6 +145,56 @@ app.MapDelete("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =
         return Results.NotFound();
     }
     db.Registro.Remove(sensor);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+/*****************************************************************************************/
+
+/************************* CRUD CONTROL *****************************************************/
+app.MapGet("/control", [Authorize] async (SmarthomeContext db) =>
+{
+    return await db.Control.ToListAsync();
+});
+
+app.MapGet("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+{
+    var sensor = await db.Control.FindAsync(id);
+    if (sensor is null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(sensor);
+});
+
+app.MapPost("/control", [Authorize] async (Controles s, SmarthomeContext db) =>
+{
+    db.Control.Add(s);
+    await db.SaveChangesAsync();
+    return Results.Created($"/control/{s.id_Control}", s);
+});
+
+app.MapPut("/control/{id}", [Authorize] async (int id, Controles s, SmarthomeContext db) =>
+{
+    var sensor = await db.Control.FindAsync(id);
+    if (sensor is null)
+    {
+        return Results.NotFound();
+    }
+    sensor.h_Registro = s.h_Registro;
+    sensor.tm_Riego = s.tm_Riego;
+    sensor.tm_Ambiente = s.tm_Ambiente;
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+app.MapDelete("/control/{id}", [Authorize] async (int id, SmarthomeContext db) =>
+{
+    var sensor = await db.Control.FindAsync(id);
+    if (sensor is null)
+    {
+        return Results.NotFound();
+    }
+    db.Control.Remove(sensor);
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
@@ -174,10 +224,21 @@ class Registros
     public DateTime fec_hora { get; set; }
 }
 
+class Controles
+{
+    [Key]
+    public int id_Control { get; set; }
+    public int id_Usuario { get; set; }
+    public string? h_Registro { get; set; }
+    public string? tm_Riego { get; set; }
+    public string? tm_Ambiente { get; set; }
+}
+
 class SmarthomeContext : DbContext
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Registros> Registro => Set<Registros>();
+    public DbSet<Controles> Control => Set<Controles>();
     public SmarthomeContext(DbContextOptions<SmarthomeContext> options) : base(options)
     {
     }
